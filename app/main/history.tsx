@@ -1,5 +1,5 @@
-import React, {useMemo, useState} from 'react';
-import {View, Text, Button} from "react-native";
+import React, {useEffect, useMemo, useState} from 'react';
+import {View, Text, Button, ActivityIndicator, RefreshControl} from "react-native";
 import {User, useUserContext} from "../../src/context/UserContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useRootNavigationState} from "expo-router";
@@ -12,18 +12,20 @@ import {RequestHistoryItem} from "../../src/share/types";
 import RequestHistoryCard from "../../src/components/RequestHistoryCard";
 
 const Page = () => {
-    const {data} = useQuery({
+    const {data, isLoading, refetch} = useQuery({
         queryKey: ["history"],
         queryFn: HistoryService.getAll,
-        select: (data) => data.data as RequestHistoryItem[]
+        select: (data) => data.data as RequestHistoryItem[],
     })
 
     const filteredData = useMemo(() => data?.filter(e => e.ai_description), [data])
 
+
     return (
         <View style={{flex: 1, backgroundColor: Theme.colors.background, paddingHorizontal: 20}}>
             <HeadingText>История генераций</HeadingText>
-            <ScrollView style={{backgroundColor: Theme.colors.background}}>
+            <ScrollView refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch}/>}
+                        style={{backgroundColor: Theme.colors.background}}>
                 <View style={{flex: 1, gap: 20}}>
                     {filteredData?.map(e => <RequestHistoryCard key={e.id} requestHistory={e}/>)}
                 </View>

@@ -1,8 +1,10 @@
-import React, {ReactNode, useEffect, useState} from 'react';
+import React, {ReactNode, useContext, useEffect, useMemo, useState} from 'react';
 import {createContext} from "react";
 import {router} from "expo-router";
 import authService from "../services/AuthService";
-import {useQuery} from "react-query";
+import {useMutation, useQuery} from "react-query";
+import {queryClient} from "../../app/_layout";
+import AsyncStorage, {useAsyncStorage} from "@react-native-async-storage/async-storage";
 
 export interface User {
     id: number,
@@ -25,26 +27,34 @@ const UserContext = createContext<UserContext>({
 })
 
 export const useUserContext = () => {
-    const [user, setUser] = useState<User | null>(null)
-
-    const {data, isFetched, refetch} = useQuery({
-        queryKey: ["user"],
-        queryFn: authService.getMe,
-        select: (data) => data.data as User,
-        onSuccess: (data) => {
-            setUser(data)
-        },
-        retry: 1,
-    })
-
-
-    return {user, isFetched, refetch, setUser}
+    return useContext(UserContext)
 }
 
 const UserContextProvider = ({children}: { children: ReactNode }) => {
-    const data = useUserContext()
+    const [user, setUser] = useState<User | null>(null)
+    const [isFetched, setIsFetched] = useState<boolean>(false)
+
+    const getUser = async () => {
+        setIsFetched(false)
+        try {
+            const response = await authService.getMe()
+            setUser(response.data)
+        } catch (e) {
+            setUser(null)
+        } finally {
+            setIsFetched(true)
+        }
+    }
+
+    useEffect(()=>{
+        if(!user && !isFetched){
+            getUser()
+        }
+    }, [])
+
+
     return (
-        <UserContext.Provider value={data}>
+        <UserContext.Provider value={{isFetched, user, setUser, refetch: getUser}}>
             {children}
         </UserContext.Provider>
     );

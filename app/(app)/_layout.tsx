@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {useUserContext} from "../../src/context/UserContext";
+import UserContextProvider, {useUserContext} from "../../src/context/UserContext";
 import {Redirect, router, Slot, SplashScreen, Stack} from "expo-router";
 import {Inter_500Medium, Inter_600SemiBold, useFonts} from "@expo-google-fonts/inter";
 import {Oswald_600SemiBold} from "@expo-google-fonts/oswald";
@@ -15,6 +15,10 @@ const AppLayout = () => {
     });
 
     const {isFetched, user} = useUserContext()
+
+    useEffect(()=>{
+        console.log(user, isFetched)
+    }, [user, isFetched])
 
     useEffect(() => {
         if (isFetched && fontsLoaded) {
@@ -39,7 +43,7 @@ const AppLayout = () => {
 
 
     return (
-        <Slot key={user?.id}/>
+            <Slot/>
     )
 };
 

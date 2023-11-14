@@ -6,6 +6,10 @@ import {router, Slot, Stack, useRootNavigationState} from "expo-router";
 import UserContextProvider, {User, useUserContext} from "../src/context/UserContext";
 import {QueryClient, QueryClientProvider} from "react-query";
 import {SplashScreen} from "expo-router";
+import { LogBox } from 'react-native';
+
+LogBox.ignoreLogs(['Warning: ...']); // Ignore log notification by message
+LogBox.ignoreAllLogs();
 
 SplashScreen.preventAutoHideAsync();
 export const queryClient = new QueryClient()

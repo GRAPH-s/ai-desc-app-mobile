@@ -9,7 +9,6 @@ import {View} from "react-native";
 import {router} from "expo-router";
 import {useUserContext} from "../../../src/context/UserContext";
 import authService from "../../../src/services/AuthService";
-import {queryClient} from "../../_layout";
 
 const Page = () => {
     const [email, setEmail] = useState<string>("")
