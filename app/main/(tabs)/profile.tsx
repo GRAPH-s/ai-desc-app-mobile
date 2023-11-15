@@ -1,13 +1,13 @@
 import React from 'react';
 import {View, Text, Button} from "react-native";
-import {useUserContext} from "../../src/context/UserContext";
+import {useUserContext} from "../../../src/context/UserContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {router, useRootNavigationState} from "expo-router";
-import HeadingText from "../../src/components/HeadingText";
-import BodyText from "../../src/components/BodyText";
-import AppButton from "../../src/components/AppButton";
-import {Theme} from "../../src/share/theme";
-import {queryClient} from "../_layout";
+import HeadingText from "../../../src/components/HeadingText";
+import BodyText from "../../../src/components/BodyText";
+import AppButton from "../../../src/components/AppButton";
+import {Theme} from "../../../src/share/theme";
+import {queryClient} from "../../_layout";
 
 const Page = () => {
     const {user, setUser} = useUserContext()

@@ -1,18 +1,20 @@
 import React from 'react';
-import {SafeAreaView, View} from "react-native";
-import {Slot, Tabs} from "expo-router";
+import {router, Stack} from "expo-router";
+import {Button, Text} from "react-native"
+import {Theme} from "../../src/share/theme";
+import AppButton from "../../src/components/AppButton";
 
-const Layout = () => {
+const RootLayout = () => {
     return (
-        <SafeAreaView style={{flex: 1, marginBottom: -30}}>
-            <Tabs initialRouteName="home" screenOptions={{headerShown: false}}>
-                <Tabs.Screen name="history"/>
-                <Tabs.Screen name="home"/>
-                <Tabs.Screen name="profile"/>
-            </Tabs>
-        </SafeAreaView>
-
+        <Stack screenOptions={{headerShown: false}}>
+            <Stack.Screen name="(tabs)"/>
+            <Stack.Screen name="ai_request" options={{
+                presentation: "modal",
+                contentStyle: {backgroundColor: Theme.colors.background}
+            }
+            }/>
+        </Stack>
     );
 };
 
-export default Layout;
+export default RootLayout;

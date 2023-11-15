@@ -10,6 +10,7 @@ class AuthService {
     }
 
     static async register(data: { email: string, password: string }) {
+        await AsyncStorage.clear()
         const response = await API.post("/users/", data)
         await this.login(data)
         return await this.getMe()

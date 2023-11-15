@@ -4,7 +4,7 @@ import {Theme} from "../share/theme";
 
 const AppInput:FC<TextInputProps> = (props) => {
     return (
-        <TextInput {...props} style={styles.input} placeholderTextColor={Theme.colors.disabled}/>
+        <TextInput {...props} style={[styles.input, props.style]} placeholderTextColor={Theme.colors.disabled}/>
     );
 };
 
