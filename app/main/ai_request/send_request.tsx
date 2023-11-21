@@ -9,32 +9,50 @@ import HeadingText from "../../../src/components/HeadingText";
 import {ScrollView} from "react-native-gesture-handler";
 import * as Clipboard from 'expo-clipboard';
 import {Theme} from "../../../src/share/theme";
+import {isAxiosError} from "axios/index";
 
 
 const Loading = () => {
 
     const [progress, setProgress] = useState<number>(15)
 
-    useEffect(()=>{
-        const interval = setInterval(()=>{
-            if(progress < 100){
-                setProgress(progress+0.5)
+    useEffect(() => {
+        const interval = setInterval(() => {
+            if (progress < 100) {
+                setProgress(progress + 0.5)
             }
         }, 50)
-        return ()=>{
+        return () => {
             clearInterval(interval)
         }
     }, [progress])
 
 
-    const step = useMemo(()=> progress < 33 ? 1 : progress < 66 ? 2 : 3, [progress])
+    const step = useMemo(() => progress < 33 ? 1 : progress < 66 ? 2 : 3, [progress])
 
     return <View style={{flex: 1, gap: 20}}>
         <HeadingText>Загрузка</HeadingText>
-        <View style={{width: '100%', height: 20, borderRadius: 10, borderColor: Theme.colors.primary, borderWidth: 1, position: "relative"}}>
-            <View style={{width: `${progress}%`, height: 18, borderRadius: 10, backgroundColor: Theme.colors.secondary, position: "absolute"}}/>
+        <View style={{
+            width: '100%',
+            height: 20,
+            borderRadius: 10,
+            borderColor: Theme.colors.primary,
+            borderWidth: 1,
+            position: "relative"
+        }}>
+            <View style={{
+                width: `${progress}%`,
+                height: 18,
+                borderRadius: 10,
+                backgroundColor: Theme.colors.secondary,
+                position: "absolute"
+            }}/>
         </View>
-        <BodyText style={{textAlign: "center", textTransform: "uppercase", color: Theme.colors.primary}}>Шаг {step}/3</BodyText>
+        <BodyText style={{
+            textAlign: "center",
+            textTransform: "uppercase",
+            color: Theme.colors.primary
+        }}>Шаг {step}/3</BodyText>
     </View>
 }
 
@@ -59,22 +77,36 @@ const Page = () => {
     const {image} = useLocalSearchParams();
     const [isLoading, setIsLoading] = useState<boolean>(false)
     const [result, setResult] = useState<string | null>(null)
-    const [state, setState] = useState<"start" | "loading" | "result">("start")
+    const [error, setError] = useState<string | null>(null)
+    const [state, setState] = useState<"start" | "loading" | "result" | "error">("start")
 
     const send = async () => {
         setIsLoading(true)
+        setError(null)
         try {
             const response = await historyService.post(String(image))
             const result = await response.data.ai_description
             setResult(String(result))
             setIsLoading(false)
         } catch (e) {
-            console.log(e)
+            if (isAxiosError(e) && e.response) {
+                const status = JSON.stringify(e.response.status)
+                const data = JSON.stringify(e.response.data)
+                setError("Ошибка " + status + `\n${data}`)
+            } else {
+                setError("Ошибка")
+            }
+        } finally {
             setIsLoading(false)
+
         }
     }
 
     useEffect(() => {
+        if (error) {
+            setState("error")
+            return;
+        }
         if (isLoading) {
             setState("loading")
             return;
@@ -83,14 +115,14 @@ const Page = () => {
             setState("result")
             return;
         }
-    }, [isLoading, result])
+    }, [isLoading, result, error])
 
     const onPress = async () => {
         await send()
     }
 
 
-    const render = (state: "start" | "loading" | "result") => {
+    const render = (state: "start" | "loading" | "result" | "error") => {
         switch (state) {
             case "result":
                 return <>
@@ -99,6 +131,21 @@ const Page = () => {
             case "loading":
                 return <>
                     <Loading/>
+                </>
+            case "error":
+                return <>
+                    <View style={{flex: 1, gap: 20}}>
+                        <BodyText
+                            style={{
+                                color: Theme.colors.danger,
+                                textAlign: "center",
+                                fontSize: 14
+                            }}>{error || "Ошибка"}</BodyText>
+                        <AppButton onPress={() => setState("start")} title="Повторить"/>
+                        <AppButton onPress={() => {
+                            router.replace("/main")
+                        }} secondary title="Отменить"/>
+                    </View>
                 </>
             default:
                 return <>
@@ -129,7 +176,7 @@ const styles = StyleSheet.create({
         gap: 20,
     },
     photo: {
-        width: '100%',  aspectRatio: '1/1', borderRadius: 8
+        width: '100%', aspectRatio: '1/1', borderRadius: 8
     },
     input: {
         width: '100%',
